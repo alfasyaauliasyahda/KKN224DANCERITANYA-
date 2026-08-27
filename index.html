@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KKN 224 Jayantara - Desa Mekarjaya 2026</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,800;1,600&display=swap" rel="stylesheet">
+  
+  <!-- React & React DOM UMD -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  
+  <!-- Babel Standalone untuk kompilasi JSX di Browser -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- Feather / Lucide Icon Helper CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .font-heading {
+      font-family: 'Playfair Display', serif;
+    }
+    /* Hide scrollbar for clean UI */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="bg-[#FFF9F2] text-[#315C45] selection:bg-[#BFE8C1] selection:text-[#315C45]">
+
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useMemo } = React;
+
+    // Helper komponen Icon SVG sederhana dari Lucide
+    const Icon = ({ name, className = "w-4 h-4", onClick }) => {
+      const ref = React.useRef(null);
+      useEffect(() => {
+        if (ref.current && window.lucide) {
+          ref.current.innerHTML = '';
+          const iconNode = window.lucide.icons[name];
+          if (iconNode) {
+            const svg = window.lucide.createIcon(name, {
+              attrs: { class: className }
+            });
+            ref.current.appendChild(svg);
+          }
+        }
+      }, [name, className]);
+      return <span ref={ref} onClick={onClick} className="inline-flex items-center justify-center" />;
+    };
+
+    // Data Awal & Default Storage
+    const INITIAL_HOMEPAGE = {
+      heroTitle: "KKN 224 JAYANTARA",
+      heroSubtitle: "Membumikan Ekotheologi Berbasis Rahmatan Lil ‘Alamin",
+      heroLocation: "Desa Mekarjaya • Kecamatan Sukaluyu • Kabupaten Cianjur • 2026",
+      heroImage: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1600&q=80",
+      heroDescription: "Wadah kolaboratif digital dan arsip dokumenter pengabdian 35 hari mahasiswa KKN 224 dalam mengintegrasikan kepedulian lingkungan dan nilai-nilai keagamaan ramah alam.",
+      statDays: "35",
+      statCycles: "4",
+      statMembers: "14",
+      statStories: "∞",
+      closingTitle: "And Then, We Went Home.",
+      closingQuote: "Kami datang membawa pengetahuan, tetapi pulang membawa lebih banyak pelajaran. Sebab pada akhirnya, pengabdian bukan hanya tentang apa yang kami berikan kepada masyarakat, tetapi juga tentang apa yang masyarakat ajarkan kepada kami.",
+      closingImage: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=80"
+    };
+
+    const INITIAL_MEMBERS = [
+      { id: "m1", name: "Faiz Ahmad", position: "Ketua Kelompok", division: "BPH", bio: "Mahasiswa Teknik Lingkungan yang berdedikasi memimpin program ekotheologi desa.", photo: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80", social: "@faiz_jayantara" },
+      { id: "m2", name: "Fasya Nurul", position: "Sekretaris I", division: "BPH", bio: "Pengelola administrasi & dokumentasi arsip digital KKN 224.", photo: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80", social: "@fasya_n" },
+      { id: "m3", name: "Tera Rizky", position: "Bendahara", division: "BPH", bio: "Manajemen keuangan dan alokasi anggaran program kerja pengabdian.", photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80", social: "@tera_rz" },
+      { id: "m4", name: "Ilham Maulana", position: "Koordinator Pubdok", division: "Humas & Dok", bio: "Videografer & perancang visual perjalanan KKN Jayantara.", photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80", social: "@ilham_visual" }
+    ];
+
+    const INITIAL_CYCLES = [
+      { id: "c1", number: "I", title: "Observasi & Pengenalan Lapangan", date: "Hari 1 - 7", location: "Seluruh RW Desa Mekarjaya", description: "Tahap awal pemetaan wilayah, silaturahmi dengan perangkat desa, pengenalan ekosistem lokal, serta identifikasi awal isu lingkungan dan keagamaan warga.", coverImage: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=800&q=80", output: "Dokumen Pemetaan Sosial Awal & Peta Isu Desa" },
+      { id: "c2", number: "II", title: "Pemetaan & Rembuk Warga (SISDAMAS)", date: "Hari 8 - 14", location: "Balai Desa & Posko KKN", description: "Musyawarah partisipatif bersama warga untuk menguraikan potensi lokal, merancang gerakan sanitasi, serta merumuskan konsep Ekotheologi terapan.", coverImage: "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=800&q=80", output: "Matriks Prioritas Program Kerja Bersama Warga" },
+      { id: "c3", number: "III", title: "Pelaksanaan Program Aksi Ekotheologi", date: "Hari 15 - 28", location: "Lahan Tani, Mesjid & Sekolah", description: "Eksekusi utama program: Pelatihan Eco-Enzyme, Peresmian Bank Sampah, Mengajar Fiqh Lingkungan di Majlis Ta'lim, dan Digitalisasi UMKM.", coverImage: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=800&q=80", output: "100 Liter Eco-Enzyme, 2 Pos Bank Sampah, Web UMKM" },
+      { id: "c4", number: "IV", title: "Evaluasi, Refleksi & Penutupan", date: "Hari 29 - 35", location: "Aula Desa Mekarjaya", description: "Pengukuran tingkat keberhasilan program, penyusunan laporan prosiding, lokakarya hasil pengabdian, dan gelaran pentas budaya pamitan.", coverImage: "https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=800&q=80", output: "Laporan Final, Video Dokumenter, Prosiding Ilmiah" }
+    ];
+
+    const INITIAL_PROGRAMS = [
+      { id: "p1", title: "Pelatihan & Produksi Eco-Enzyme Rumah Tangga", category: "🌱 Lingkungan", target: "Ibu-Ibu PKK & Petani", location: "Balai RW 03", date: "Minggu 2 - 3", description: "Mengolah limbah buah dan sayur organik menjadi cairan serbaguna ramah lingkungan berbasis pemahaman menjaga amanah kelestarian bumi.", result: "Dihasilkan 120 Liter larutan Eco-Enzyme dan sertifikasi kader desa.", coverImage: "https://images.unsplash.com/photo-1615811361523-6bd03d7748e7?auto=format&fit=crop&w=800&q=80" },
+      { id: "p2", title: "Rumah Belajar Ekotheologi Anak-Anak", category: "📚 Pendidikan", target: "Anak SD & TPQ", location: "Posko KKN 224", date: "Rutin Tiap Sore", description: "Kurikulum mengajar mengaji yang diintegrasikan dengan pemahaman mencintai flora, fauna, dan kebersihan sungai.", result: "Terselenggara 18 sesi mengajar dengan 45 anak aktif.", coverImage: "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=800&q=80" },
+      { id: "p3", title: "Inisiasi Bank Sampah Organik Mesjid Rahmatan", category: "🕌 Keagamaan", target: "Jamaah Mesjid & Warga", location: "Mesjid Al-Hidayah", date: "Minggu 3", description: "Gerakan Shadaqah Sampah plastik dan limbah terpilah untuk dana pemeliharaan fasilitas mesjid.", result: "Terkumpul 85 kg plastik layak daur ulang pada penimbangan perdana.", coverImage: "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&w=800&q=80" }
+    ];
+
+    const INITIAL_GALLERY = [
+      { id: "g1", title: "Ceria Bersama Anak-Anak Desa", category: "Education", caption: "Sesi edukasi memilah sampah plastik di SDN Mekarjaya 1.", date: "2026-07-28", image: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=800&q=80", uploader: "Ilham Maulana" },
+      { id: "g2", title: "Keindahan Alam Mekarjaya", category: "Environment", caption: "Panorama persawahan hijau Sukaluyu di pagi hari saat observasi.", date: "2026-07-22", image: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=800&q=80", uploader: "Ilham Maulana" },
+      { id: "g3", title: "Rembuk Warga Pemetaan SISDAMAS", category: "Community", caption: "Diskusi terbuka dengan para ketua RT/RW membahas program air bersih.", date: "2026-08-01", image: "https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=800&q=80", uploader: "Fasya Nurul" }
+    ];
+
+    const INITIAL_LOGBOOK = [
+      { id: "l1", day: 1, date: "2026-07-20", activity: "Penyambutan Resmi & Serah Terima Mahasiswa", location: "Kantor Kecamatan Sukaluyu", description: "Penyambutan oleh Camat dan Kepala Desa Mekarjaya. Pembagian posko utama KKN 224 Jayantara.", photo: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=600&q=80" },
+      { id: "l2", day: 5, date: "2026-07-24", activity: "Silaturahmi Tokoh Agama & Pengenalan Konsep Ekotheologi", location: "Kediaman Tokoh Masyarakat", description: "Diskusi santai mengenai potensi penerapan ceramah bertema pelestarian lingkungan di majlis ta'lim.", photo: "https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?auto=format&fit=crop&w=600&q=80" }
+    ];
+
+    function App() {
+      const [activeTab, setActiveTab] = useState('home');
+      const [currentUser, setCurrentUser] = useState(null);
+      const [loginModalOpen, setLoginModalOpen] = useState(false);
+      const [searchQuery, setSearchQuery] = useState('');
+      const [toast, setToast] = useState(null);
+
+      const [homepage, setHomepage] = useState(() => {
+        const saved = localStorage.getItem('kkn224_home');
+        return saved ? JSON.parse(saved) : INITIAL_HOMEPAGE;
+      });
+
+      const [members] = useState(INITIAL_MEMBERS);
+      const [cycles] = useState(INITIAL_CYCLES);
+      const [programs] = useState(INITIAL_PROGRAMS);
+      const [gallery] = useState(INITIAL_GALLERY);
+      const [logbook] = useState(INITIAL_LOGBOOK);
+
+      const showToast = (msg) => {
+        setToast(msg);
+        setTimeout(() => setToast(null), 3000);
+      };
+
+      const handleQuickLogin = (role, name) => {
+        setCurrentUser({ name, role });
+        setLoginModalOpen(false);
+        showToast(`Selamat datang, ${name}!`);
+      };
+
+      return (
+        <div className="min-h-screen flex flex-col justify-between">
+          {/* Header & Navigasi */}
+          <header className="sticky top-0 z-40 bg-[#FFF9F2]/90 backdrop-blur-md border-b border-[#315C45]/10 shadow-sm">
+            <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
+              
+              <div onClick={() => setActiveTab('home')} className="flex items-center gap-3 cursor-pointer">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#315C45] to-[#BFE8C1] flex items-center justify-center text-white font-bold text-lg shadow">
+                  224
+                </div>
+                <div>
+                  <span className="text-lg font-extrabold tracking-tight text-[#315C45] block font-heading">
+                    JAYANTARA
+                  </span>
+                  <span className="text-[10px] font-semibold text-[#315C45]/70 flex items-center gap-1">
+                    <Icon name="map-pin" className="w-3 h-3" /> Mekarjaya 2026
+                  </span>
+                </div>
+              </div>
+
+              {/* Menu Navigasi Desktop */}
+              <div className="hidden lg:flex items-center gap-1 text-xs font-semibold">
+                {[
+                  { id: 'home', label: 'Beranda' },
+                  { id: 'about', label: 'Tentang' },
+                  { id: 'members', label: 'Anggota' },
+                  { id: 'cycles', label: 'Siklus' },
+                  { id: 'programs', label: 'Program' },
+                  { id: 'gallery', label: 'Galeri' },
+                  { id: 'logbook', label: 'Logbook' }
+                ].map(tab => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`px-3 py-2 rounded-lg transition-colors ${
+                      activeTab === tab.id 
+                        ? 'bg-[#315C45] text-white shadow-sm font-bold' 
+                        : 'hover:bg-[#DFF3DC] text-[#315C45]'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* User Login status */}
+              <div className="flex items-center gap-2">
+                {currentUser ? (
+                  <div className="flex items-center gap-2 bg-[#DFF3DC] px-3 py-1.5 rounded-full border border-[#315C45]/20 text-xs">
+                    <Icon name="shield" className="w-4 h-4 text-emerald-700" />
+                    <span className="font-bold">{currentUser.name}</span>
+                    <button onClick={() => setCurrentUser(null)} className="ml-2 text-red-600 font-bold hover:underline">
+                      Logout
+                    </button>
+                  </div>
+                ) : (
+                  <button 
+                    onClick={() => setLoginModalOpen(true)}
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#315C45] text-white text-xs font-bold shadow hover:bg-[#254836] transition"
+                  >
+                    <Icon name="log-in" className="w-3.5 h-3.5" /> Login CMS
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Mobile Nav */}
+            <div className="flex lg:hidden overflow-x-auto px-4 py-2 border-t border-[#315C45]/10 gap-1 text-xs font-medium no-scrollbar">
+              {['home', 'about', 'members', 'cycles', 'programs', 'gallery', 'logbook'].map(t => (
+                <button
+                  key={t}
+                  onClick={() => setActiveTab(t)}
+                  className={`px-3 py-1.5 rounded-full whitespace-nowrap capitalize ${activeTab === t ? 'bg-[#315C45] text-white font-bold' : 'bg-white text-[#315C45]'}`}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+          </header>
+
+          {/* Notifikasi Toast */}
+          {toast && (
+            <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-2xl bg-[#315C45] text-white text-xs font-bold shadow-2xl">
+              <Icon name="sparkles" className="w-4 h-4 text-amber-300" /> {toast}
+            </div>
+          )}
+
+          {/* Konten Utama */}
+          <main className="mb-auto">
+            {/* 1. BERANDA */}
+            {activeTab === 'home' && (
+              <div>
+                <section className="relative overflow-hidden pt-12 pb-20 px-4 bg-gradient-to-b from-[#DFF3DC]/50 to-transparent">
+                  <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                    <div className="lg:col-span-7 space-y-6">
+                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#BFE8C1] text-[#315C45] text-xs font-bold">
+                        <Icon name="sparkles" className="w-3.5 h-3.5" /> DOKUMENTASI RESMI KKN 2026
+                      </div>
+                      <h1 className="text-4xl sm:text-6xl font-black text-[#315C45] tracking-tight leading-tight font-heading">
+                        {homepage.heroTitle}
+                      </h1>
+                      <p className="text-xl sm:text-2xl font-bold text-[#315C45]/80 italic">
+                        "{homepage.heroSubtitle}"
+                      </p>
+                      <p className="text-sm text-gray-700 leading-relaxed max-w-2xl">
+                        {homepage.heroDescription}
+                      </p>
+                      <div className="flex flex-wrap items-center gap-4 pt-2">
+                        <button 
+                          onClick={() => setActiveTab('cycles')}
+                          className="px-6 py-3 rounded-full bg-[#315C45] text-white text-xs font-bold shadow-lg hover:bg-[#254836] transition flex items-center gap-2"
+                        >
+                          Jelajahi 4 Siklus SISDAMAS <Icon name="chevron-right" className="w-4 h-4" />
+                        </button>
+                        <button 
+                          onClick={() => setActiveTab('gallery')}
+                          className="px-6 py-3 rounded-full bg-white text-[#315C45] text-xs font-bold border border-[#315C45]/20 shadow-sm hover:bg-[#DFF3DC] transition"
+                        >
+                          Galeri Perjalanan
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="lg:col-span-5">
+                      <div className="p-4 bg-white rounded-3xl shadow-2xl border border-[#315C45]/10">
+                        <img src={homepage.heroImage} alt="Hero KKN 224" className="w-full h-80 object-cover rounded-2xl" />
+                        <div className="pt-4 text-center">
+                          <span className="font-serif italic text-[#315C45] text-base font-bold">
+                            “Membumikan Ekotheologi di Mekarjaya”
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Stat Cards */}
+                  <div className="max-w-7xl mx-auto mt-16 grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {[
+                      { number: homepage.statDays, label: "Hari Pengabdian" },
+                      { number: homepage.statCycles, label: "Siklus SISDAMAS" },
+                      { number: homepage.statMembers, label: "Anggota Tim" },
+                      { number: homepage.statStories, label: "Cerita & Kenangan" }
+                    ].map((s, idx) => (
+                      <div key={idx} className="bg-white/80 p-6 rounded-2xl border border-[#315C45]/10 shadow-sm text-center">
+                        <div className="text-3xl font-black text-[#315C45]">{s.number}</div>
+                        <div className="text-xs font-bold text-gray-800 mt-1">{s.label}</div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+
+                {/* Closing Banner */}
+                <section className="py-16 px-4 max-w-5xl mx-auto text-center">
+                  <div className="bg-gradient-to-br from-[#315C45] to-[#1e3b2c] text-white rounded-3xl p-8 sm:p-12 shadow-2xl space-y-6">
+                    <h2 className="text-3xl sm:text-4xl font-black font-heading">
+                      "{homepage.closingTitle}"
+                    </h2>
+                    <p className="text-sm sm:text-lg font-light italic leading-relaxed max-w-2xl mx-auto text-emerald-100">
+                      "{homepage.closingQuote}"
+                    </p>
+                    <img src={homepage.closingImage} alt="Penutupan KKN" className="w-full h-64 object-cover rounded-2xl border-4 border-white/20 shadow-lg mx-auto" />
+                  </div>
+                </section>
+              </div>
+            )}
+
+            {/* 2. TENTANG */}
+            {activeTab === 'about' && (
+              <div className="max-w-4xl mx-auto px-4 py-12 space-y-6">
+                <div className="bg-white p-8 rounded-3xl shadow border border-[#315C45]/10 space-y-4">
+                  <span className="text-xs font-bold uppercase px-3 py-1 rounded-full bg-[#DFF3DC] text-[#315C45]">
+                    PROFIL PENGABDIAN
+                  </span>
+                  <h1 className="text-3xl font-black text-[#315C45]">KKN 224 JAYANTARA 2026</h1>
+                  <p className="text-sm text-gray-700 leading-relaxed">
+                    KKN 224 Jayantara merupakan kelompok pengabdian mahasiswa di Desa Mekarjaya, Kecamatan Sukaluyu, Kabupaten Cianjur. Berusung tema <strong>“Membumikan Ekotheologi Berbasis Rahmatan Lil ‘Alamin”</strong>, kami menyelaraskan kesadaran keagamaan dan pelestarian alam lingkungan.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* 3. ANGGOTA */}
+            {activeTab === 'members' && (
+              <div className="max-w-7xl mx-auto px-4 py-12 space-y-6">
+                <h1 className="text-3xl font-black text-[#315C45]">Anggota Tim Jayantara</h1>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {members.map(m => (
+                    <div key={m.id} className="bg-white rounded-3xl overflow-hidden border border-[#315C45]/10 shadow-sm">
+                      <img src={m.photo} alt={m.name} className="w-full h-60 object-cover" />
+                      <div className="p-4 space-y-1">
+                        <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-[#DFF3DC] text-[#315C45]">
+                          {m.division}
+                        </span>
+                        <h3 className="font-extrabold text-base text-[#315C45]">{m.name}</h3>
+                        <div className="text-xs font-semibold text-emerald-700">{m.position}</div>
+                        <p className="text-xs text-gray-600 pt-1 line-clamp-2">{m.bio}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 4. SIKLUS */}
+            {activeTab === 'cycles' && (
+              <div className="max-w-6xl mx-auto px-4 py-12 space-y-6">
+                <h1 className="text-3xl font-black text-[#315C45] text-center">4 Siklus SISDAMAS</h1>
+                <div className="space-y-6">
+                  {cycles.map(c => (
+                    <div key={c.id} className="bg-white rounded-3xl p-6 border border-[#315C45]/10 shadow-md grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+                      <img src={c.coverImage} alt={c.title} className="md:col-span-4 w-full h-48 object-cover rounded-2xl" />
+                      <div className="md:col-span-8 space-y-2">
+                        <span className="text-xs font-bold px-3 py-1 rounded-full bg-[#315C45] text-white">
+                          SIKLUS {c.number}
+                        </span>
+                        <h2 className="text-xl font-black text-[#315C45]">{c.title}</h2>
+                        <p className="text-xs text-gray-600">{c.description}</p>
+                        <div className="text-xs font-bold text-emerald-700 bg-[#FFF9F2] p-3 rounded-xl">
+                          Output: {c.output}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 5. PROGRAM KERJA */}
+            {activeTab === 'programs' && (
+              <div className="max-w-6xl mx-auto px-4 py-12 space-y-6">
+                <h1 className="text-3xl font-black text-[#315C45]">Program Kerja Pengabdian</h1>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {programs.map(p => (
+                    <div key={p.id} className="bg-white rounded-3xl p-4 border border-[#315C45]/10 shadow space-y-3">
+                      <img src={p.coverImage} alt={p.title} className="w-full h-40 object-cover rounded-2xl" />
+                      <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-[#DFF3DC] text-[#315C45]">
+                        {p.category}
+                      </span>
+                      <h3 className="font-bold text-base text-[#315C45]">{p.title}</h3>
+                      <p className="text-xs text-gray-600">{p.description}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 6. GALERI */}
+            {activeTab === 'gallery' && (
+              <div className="max-w-6xl mx-auto px-4 py-12 space-y-6">
+                <h1 className="text-3xl font-black text-[#315C45]">Galeri Dokumentasi</h1>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                  {gallery.map(g => (
+                    <div key={g.id} className="bg-white p-3 rounded-3xl border border-[#315C45]/10 shadow">
+                      <img src={g.image} alt={g.title} className="w-full h-48 object-cover rounded-2xl" />
+                      <h3 className="font-bold text-sm mt-2">{g.title}</h3>
+                      <p className="text-xs text-gray-500">{g.caption}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 7. LOGBOOK */}
+            {activeTab === 'logbook' && (
+              <div className="max-w-3xl mx-auto px-4 py-12 space-y-6">
+                <h1 className="text-3xl font-black text-[#315C45]">Logbook Harian Posko</h1>
+                <div className="space-y-4">
+                  {logbook.map(l => (
+                    <div key={l.id} className="bg-white p-5 rounded-3xl border border-[#315C45]/10 shadow space-y-2">
+                      <div className="flex justify-between items-center text-xs font-bold">
+                        <span className="px-3 py-0.5 rounded-full bg-[#DFF3DC] text-[#315C45]">Hari {l.day}</span>
+                        <span className="text-gray-400">{l.date}</span>
+                      </div>
+                      <h3 className="font-bold text-base text-[#315C45]">{l.activity}</h3>
+                      <p className="text-xs text-gray-600">{l.description}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </main>
+
+          {/* Login Modal */}
+          {loginModalOpen && (
+            <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+              <div className="bg-white rounded-3xl max-w-sm w-full p-6 space-y-4 shadow-2xl text-center">
+                <h3 className="text-lg font-black text-[#315C45]">Simulasi Login CMS</h3>
+                <p className="text-xs text-gray-500">Pilih salah satu akun pengurus untuk mencoba status login:</p>
+                <div className="space-y-2">
+                  <button onClick={() => handleQuickLogin('admin', 'Faiz Ahmad')} className="w-full p-3 rounded-2xl bg-[#315C45] text-white text-xs font-bold">
+                    Login Sebagai Admin (Faiz)
+                  </button>
+                  <button onClick={() => handleQuickLogin('contributor', 'Fasya Nurul')} className="w-full p-3 rounded-2xl bg-[#DFF3DC] text-[#315C45] text-xs font-bold">
+                    Login Sebagai Anggota (Fasya)
+                  </button>
+                </div>
+                <button onClick={() => setLoginModalOpen(false)} className="text-xs text-gray-400 hover:underline">
+                  Tutup
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Footer */}
+          <footer className="border-t border-[#315C45]/10 bg-white py-8 px-4 text-center text-xs text-gray-500 mt-12">
+            <div className="max-w-7xl mx-auto space-y-2">
+              <div className="font-bold text-[#315C45] font-heading text-sm">
+                KKN 224 JAYANTARA • DESA MEKARJAYA 2026
+              </div>
+              <p>“Membumikan Ekotheologi Berbasis Rahmatan Lil ‘Alamin”</p>
+            </div>
+          </footer>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
